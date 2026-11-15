@@ -1,0 +1,27 @@
+name: Squash history safely
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"
+
+jobs:
+  squash:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: live
+          fetch-depth: 1
+
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout --orphan clean-live
+          git add -A
+          git commit -m "state snapshot"
+          git push -f origin clean-live:live
